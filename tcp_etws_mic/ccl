@@ -1,0 +1,8 @@
+gcc -std=c99  -fPIC -g -c dynamic_page.c -o libm.o
+gcc -std=c99 -g -shared -o dynamic_page.so libm.o -lc
+rm ./libm.o
+icc  -std=c99 assistant_method.c main.c workers.c dynamic_static_page_operation.c epoll_operation.c request_operation.c socket_operation.c event_operation.c mic_operation.c -o tws -ldl -lpthread -lscif 
+
+icc  -std=c99 workers.c handler.c -o handler -lpthread -lscif -mmic
+#icc  -std=c99 host.c -o client -lscif -lpthread
+mscp handler

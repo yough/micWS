@@ -1,0 +1,4 @@
+gcc -std=c99  -fPIC -g -c dynamic_page.c -o libm.o
+gcc -std=c99 -g -shared -o dynamic_page.so libm.o -lc
+rm ./libm.o
+gcc  -std=c99 assistant_method.c main.c workers.c dynamic_static_page_operation.c epoll_operation.c request_operation.c socket_operation.c event_operation.c -o etws -ldl -lpthread 

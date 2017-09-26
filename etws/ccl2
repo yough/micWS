@@ -1,0 +1,4 @@
+gcc -std=c99 -fPIC -g -c s.c -o libm.o
+gcc -std=c99 -g -shared -o libm.so libm.o -lc
+rm ./libm.o
+gcc  -g -std=c99 main.c threadPool.c call_so.c  -o eows -ldl -fopenmp -lpthread
