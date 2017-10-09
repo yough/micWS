@@ -21,6 +21,7 @@ int write_response(void *args, void *result)
     strcpy(response, header);
     strcat(response, pArgs->return_result);
 
+    if(cfd==0) return -1;
     int ret=write(cfd, response, sizeof(response));
     if (ret==-1) 
     {

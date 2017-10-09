@@ -1,5 +1,5 @@
 #include "common.h"
-#define REQUEST_NUM 1000
+#define REQUEST_NUM 10
 
 runtime_args args_array[REQUEST_NUM];
 int count=0;
@@ -12,7 +12,11 @@ int connectMIC(void *args, void *result)
 	portID.node=1; portID.port=21;
 	struct timeval tv, tv1;
 
-    if(count==999)
+    runtime_args *pArgs=(runtime_args*)args;	
+    //printf("count=%d: %d\n", count, pArgs->cfd);
+    args_array[count++]= *pArgs;
+
+    if(count==REQUEST_NUM)
     {
         if((epd=scif_open())<0)
         {
@@ -36,9 +40,6 @@ int connectMIC(void *args, void *result)
         }	
 
         //runtime_args *pArgs=(runtime_args*)args;	
-        //err=scif_send(epd, pArgs, sizeof(runtime_args), 1);
-        runtime_args *pArgs=(runtime_args*)args;	
-        //printf("count==9: %s\n", pArgs->root_path);
         err=scif_send(epd, args_array, REQUEST_NUM*sizeof(runtime_args), 1);
         if(err<0)
         {
@@ -49,13 +50,6 @@ int connectMIC(void *args, void *result)
         scif_close(epd);
         count=0;
     }
-    else 
-    {
-        runtime_args *pArgs=(runtime_args*)args;	
-        //printf("count=%d: %s\n", count, pArgs->root_path);
-        args_array[count++]= *pArgs;
-    }
-
 	return err;
 }	
 
@@ -105,15 +99,17 @@ void server_routine(void* args)
                 char file_content[MAX_LINE];
                 int efd=pArgs->efd; 
                 int cfd=pArgs->cfd;
+                if(cfd==0) printf("cfd==0 in service routine\n");
                 strcpy(file_content, pArgs->root_path);
-                print("file_content in server_routine:%s\n", file_content);
+                //printf("%d. file_content in server_routine:%s.\n", i, file_content);
                
                 writer_args *pWriterArgs=(writer_args*)malloc(sizeof(writer_args));
                 pWriterArgs->cfd=cfd;
                 pWriterArgs->efd=efd;
                 strcpy(pWriterArgs->return_result, file_content); 
                 writer->put_job(writer, pWriterArgs); 
-
+                //write_response(pWriterArgs, NULL);
+                free(pWriterArgs);
             }
         }
         else if(err<0)

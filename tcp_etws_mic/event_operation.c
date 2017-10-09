@@ -101,8 +101,16 @@ int runtime(void *args, workers * handler, workers *writer)
                 pArgs->efd=efd; pArgs->cfd=cfd;
                 strcpy(pArgs->root_path, file_path);
                 sender->put_job(sender, pArgs);                       
-                flag=0;
+                flag=3;
             }
+            else if(flag==3)
+            {//mic
+                runtime_args* pArgs=(runtime_args*)malloc(sizeof(runtime_args));
+                pArgs->efd=efd; pArgs->cfd=cfd;
+                strcpy(pArgs->root_path, file_path);
+                sender->put_job(sender, pArgs);                       
+                flag=0;
+            } 
         }
     }
     else if(ret==-1) 

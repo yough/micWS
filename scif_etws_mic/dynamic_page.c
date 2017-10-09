@@ -15,7 +15,7 @@ float cosf(float f)
     //print("f in cpu: %f\n", f);
     long long l1=get_time();
     float sum=0;
-    for(int i=0; i<10000000; i++)
+    for(int i=0; i<2000000; i++)
     {
         sum+=f;
     }

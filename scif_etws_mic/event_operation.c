@@ -60,8 +60,8 @@ int runtime(void *args, workers * handler, workers *writer)
                 pArgs->sender=writer;
                 strcpy(pArgs->root_path, file_path);
                 handler->put_job(handler, pArgs);                       
-          //      flag=1;
-	        }
+                //flag=1;
+	    }
             else if(flag==1)
             {//mic
                 runtime_args* pArgs=(runtime_args*)malloc(sizeof(runtime_args));
@@ -69,8 +69,35 @@ int runtime(void *args, workers * handler, workers *writer)
                 strcpy(pArgs->root_path, file_path);
                 //sender->put_job(sender, pArgs);                       
                 connectMIC(pArgs, NULL);
-            //    flag=0;
+                //flag=2;
             }
+            /*else if(flag==2)
+            {//mic
+                runtime_args* pArgs=(runtime_args*)malloc(sizeof(runtime_args));
+                pArgs->efd=efd; pArgs->cfd=cfd;
+                strcpy(pArgs->root_path, file_path);
+                //sender->put_job(sender, pArgs);                       
+                connectMIC(pArgs, NULL);
+                flag=3;
+            }
+            else if(flag==3)
+            {//mic
+                runtime_args* pArgs=(runtime_args*)malloc(sizeof(runtime_args));
+                pArgs->efd=efd; pArgs->cfd=cfd;
+                strcpy(pArgs->root_path, file_path);
+                //sender->put_job(sender, pArgs);                       
+                connectMIC(pArgs, NULL);
+                flag=4;
+            }
+            else if(flag==4) 
+            {//mic
+                runtime_args* pArgs=(runtime_args*)malloc(sizeof(runtime_args));
+                pArgs->efd=efd; pArgs->cfd=cfd;
+                strcpy(pArgs->root_path, file_path);
+                //sender->put_job(sender, pArgs);                       
+                connectMIC(pArgs, NULL);
+                flag=0;
+            }*/
         }
     }
     else if(ret==-1) 

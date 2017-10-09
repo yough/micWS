@@ -10,7 +10,8 @@
 #include <sys/ioctl.h>
 #include <scif.h>
 #define MAX_LINE 1024
-#define REQUEST_NUM 1000
+#define REQUEST_NUM 10
+#define SERVICE_THREAD_NUM 100
 
 float cosf(float f);
 long long get_time();
@@ -38,11 +39,11 @@ float cosf(float f)
     long long l1=get_time();
     float sum=0;
     int i;
-    for(i=0; i<2000000000; i++)
+    for(i=0; i<8000000; i++)
     {
         sum+=f;
     }
-    printf("time in cosf=%lld\n", get_time()-l1);
+    //printf("time in cosf=%lld\n", get_time()-l1);
     //print("sum in mic: %f\n", sum);
     return sum;
 }
@@ -73,7 +74,9 @@ int sender_routine(void *arg, void *result)
 	int block=1, node=0;
 	struct scif_portID portID;
 	portID.node=node; portID.port=42;
-    if(count==999)
+
+    args_array[count++]= *pArgs;
+    if(count==REQUEST_NUM)
     {
         if((epd=scif_open())<0)
         {
@@ -92,9 +95,7 @@ int sender_routine(void *arg, void *result)
                 printf("scif_connect retry: %s\n", strerror(errno));
             }
             printf("scif_connect: %s\n", strerror(errno));
-            //exit(3);
         }	
-        //err=scif_send(epd, pArgs, sizeof(runtime_args), block);
         err=scif_send(epd, args_array, REQUEST_NUM*sizeof(runtime_args), block);
         if(err<0)
         {
@@ -102,11 +103,7 @@ int sender_routine(void *arg, void *result)
             fflush(stdout);
         }
         scif_close(epd);
-    }
-    else 
-    {
-        //printf("count=%d: %s\n", count, pArgs->root_path);
-        args_array[count++]= *pArgs;
+        count=0;
     }
 	return 0;
 }	
@@ -118,8 +115,7 @@ int main(int argc, char **argv)
 	int backlog=1024;
 	struct scif_portID portID;
 	portID.node=0; portID.port=22;
-    workers *handler=new_workers(handler_routine, 1000);
-//    workers *handler=new_workers(handler_routine, 228);
+    workers *handler=new_workers(handler_routine, SERVICE_THREAD_NUM);
     workers *sender=new_workers(sender_routine, 1);
 
 	if((epd=scif_open())<0) 
@@ -153,7 +149,6 @@ int main(int argc, char **argv)
         }
         memset(pArgs, 0x00, sizeof(runtime_args));
         runtime_args args_array[REQUEST_NUM];
-        //int err=scif_recv(newepd, pArgs, sizeof(runtime_args), 1);
         int err=scif_recv(newepd, args_array, REQUEST_NUM*sizeof(runtime_args), 1);
         if(err>0)
         {
@@ -162,8 +157,8 @@ int main(int argc, char **argv)
                 memcpy(pArgs, args_array+i, sizeof(runtime_args));
                 char file_content[MAX_LINE];
                 strcpy(file_content, pArgs->root_path);
-                printf("file_content in handler main: %s\n", file_content);
                 pArgs->sender=sender;
+                //printf("count %d: %d\n", i, pArgs->cfd);
                 handler->put_job(handler, (void*)pArgs);
             }
         }

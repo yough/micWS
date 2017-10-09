@@ -21,8 +21,11 @@ int write_response(void *args, void *result)
     strcpy(response, header);
     strcat(response, pArgs->return_result);
 
-    int ret=write(cfd, response, sizeof(response));
-    if (ret==-1) 
+    //int ret=write(cfd, response, sizeof(response));
+    //printf("cfd=%d, response=%s\n", cfd, response);
+    if(cfd==0) return -1;
+    int ret=send(cfd, response, sizeof(response), 0);
+    if(ret==-1) 
     {
         if(errno==EAGAIN||errno==ECONNRESET) 
         {
@@ -31,7 +34,10 @@ int write_response(void *args, void *result)
         print("write: %s\n", strerror(errno));
         shut_remove_conn(cfd, efd);
     }
-    else if(ret>=0) shut_remove_conn(cfd, efd);
+    else if(ret>=0) 
+    {
+        shut_remove_conn(cfd, efd);
+    }
     free(pArgs);
     return 0;
 }
