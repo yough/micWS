@@ -1,0 +1,1 @@
+mpiexec.hydra -host 172.31.1.254 -n 1 ./mpihw : -host 172.31.1.1 -n 1 /root/mpihw_mic
