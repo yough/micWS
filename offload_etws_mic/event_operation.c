@@ -1,5 +1,5 @@
 #include "common.h"
-#define BATCH_SIZE 100
+#define BATCH_SIZE 200
 
 typedef struct _paraList
 {
@@ -72,6 +72,7 @@ int runtime(void *args, void * result)
             if(paraCount==BATCH_SIZE)
             {
                 #pragma offload target(mic:0), inout(request_array)
+                #pragma omp parallel for
                 for(int i=0; i<BATCH_SIZE; i++)
                 {
                     if(strlen(request_array[i].arg_name)==0)
@@ -87,7 +88,7 @@ int runtime(void *args, void * result)
                 for(int i=0; i<BATCH_SIZE; i++)
                 {
                     write_response(request_array[i].efd, request_array[i].cfd, request_array[i].file_content); 
-                    printf("file_path[%d]=%s, file_content=%s\n", i, request_array[i].file_path, request_array[i].file_content);
+                    //printf("file_path[%d]=%s, file_content=%s\n", i, request_array[i].file_path, request_array[i].file_content);
                 }
                 paraCount=0;
             }
