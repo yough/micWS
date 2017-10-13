@@ -56,11 +56,27 @@ typedef struct _runtime_args
     int efd;
     int cfd;
     char root_path[MAX_LINE];
+    workers *fun;
 } runtime_args;
 
+typedef struct _paraList
+{
+    int efd;
+    int cfd;
+    char file_path[100];
+    char file_content[100];
+    char arg_name[5];
+    char arg_value[5];
+} paraList;
+
 //dynamic and static page operation
-extern __attribute__((target(mic))) int load_execute_dynamic_page(char *page, char* arg_name,char * arg_value, char *file_content);
-extern __attribute__((target(mic))) int load_static_page(char *file_path, char * file_content);
+extern int load_execute_dynamic_page(char *page, char* arg_name,char * arg_value, char *file_content);
+extern int load_static_page(char *file_path, char * file_content);
+extern __attribute__((target(mic))) int execute_dynamic_page_on_mic(char *file_path, char * arg_name, char * arg_value, char *file_content);
+extern __attribute__((target(mic))) int execute_static_page_on_mic(char *file_path, char * file_content);
+//extern int handler_on_mic(int efd, int cfd, char *file_path, char *arg_name, char *arg_value);
+extern int handler_on_cpu(void *ppl, void *result);
+extern int handler_on_mic(paraList pl);
 
 //socket operation
 int init_socket(char *address, int port);
@@ -76,6 +92,6 @@ extern int init_epoll(int sockfd);
 extern int accept_add_fd(int sockfd, int efd, struct epoll_event *evp); 
 
 //event operation
-extern void do_event(struct epoll_event *evp, int lfd, int efd, char* root_path, workers *handler);
+extern void do_event(struct epoll_event *evp, int lfd, int efd, char* root_path, workers *handler, workers *handler_cpu);
 extern int runtime(void *args, void *result);
 

@@ -19,6 +19,7 @@ int main(void)
     efd=init_epoll(lfd);
     workers *logger=new_workers(write_log, 1);
     workers *handler=new_workers(runtime, 1);
+    workers *handler_cpu=new_workers(handler_on_cpu, 24);
 
     printf("Listening on: %s:%d:/%s [%d]\n", ip_addr, port, root_path, thread_pool_size);
 
@@ -37,7 +38,7 @@ int main(void)
 
         for(int i=0; i<n; i++)
         {
-            do_event(&events[i], lfd, efd, root_path, handler);
+            do_event(&events[i], lfd, efd, root_path, handler, handler_cpu);
         }
 	}
     close(lfd);
