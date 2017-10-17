@@ -44,6 +44,7 @@ extern char root_path[MAX_LINE];
 extern int write_log(void *arg, void *result);
 extern int read_config(int * port, char * path, char * ip_addr, int * thread_pool_size);
 extern long long get_time();
+extern int return_rand_num(int max);
 
 //request operation
 extern int read_request(int efd, int cfd, char *request);
@@ -94,4 +95,5 @@ extern int accept_add_fd(int sockfd, int efd, struct epoll_event *evp);
 //event operation
 extern void do_event(struct epoll_event *evp, int lfd, int efd, char* root_path, workers *handler, workers *handler_cpu);
 extern int runtime(void *args, void *result);
+extern void time_scheduler(void *p);
 

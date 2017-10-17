@@ -61,7 +61,7 @@ float cosf(float f)
 {
     //long long l1=get_time();
     float sum=0;
-    for(int i=0; i<20000000; i++)
+    for(int i=0; i<40000000; i++)
     {
         sum+=f;
     }

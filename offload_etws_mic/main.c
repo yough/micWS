@@ -23,6 +23,9 @@ int main(void)
 
     printf("Listening on: %s:%d:/%s [%d]\n", ip_addr, port, root_path, thread_pool_size);
 
+    pthread_t tid;
+    pthread_create(&tid, NULL, (void*)time_scheduler, NULL);
+
     struct epoll_event events[MAX_EVENT_NUM];
 	while(true)
 	{

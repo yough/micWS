@@ -114,6 +114,12 @@ int write_log(void *arg, void *result)
 	return 0;
 }
 
+int return_rand_num(int max)
+{
+    srand(time(0));    
+    return rand()%max;
+}
+
 long long get_time()
 {
     struct timeval tv;

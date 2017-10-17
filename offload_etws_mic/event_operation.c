@@ -1,8 +1,9 @@
 #include "common.h"
 #define BATCH_SIZE 200
+long long start_time=0;
 
 __attribute__((target(mic))) paraList request_array[BATCH_SIZE];
-int paraCount=0;
+__attribute__((target(mic))) int paraCount=0;
 
 void do_event(struct epoll_event *evp, int lfd, int efd, char* root_path, workers *handler, workers *handler_cpu) 
 {
@@ -61,7 +62,7 @@ int runtime(void *args, void * result)
             strcpy(pl.arg_value, arg_value);
             pl.efd=efd; pl.cfd=cfd;
 
-/*            if(flag==0)
+            if(flag==0)
             {//host
                 handler_cpu->put_job(handler_cpu, (void*)&pl);
                 flag=1;
@@ -74,16 +75,16 @@ int runtime(void *args, void * result)
             else if(flag==2)
             {//mic
                 handler_on_mic(pl);
-                flag=3;
+                flag=0;
             }
             else if(flag==3)
             {//mic
                 handler_on_mic(pl);
                 flag=0;
             }
-*/
-            handler_cpu->put_job(handler_cpu, (void*)&pl);
-            //handler_on_mic(pl);
+
+      //      handler_cpu->put_job(handler_cpu, (void*)&pl);
+//            handler_on_mic(pl);
 
         }
     }
@@ -97,12 +98,15 @@ int runtime(void *args, void * result)
 
 int handler_on_mic(paraList pl)
 {
+    if(paraCount==0) start_time=get_time();
     strcpy(request_array[paraCount].file_path, pl.file_path);
     strcpy(request_array[paraCount].arg_name,  pl.arg_name);
     strcpy(request_array[paraCount].arg_value, pl.arg_value);
     request_array[paraCount].efd=pl.efd;
     request_array[paraCount].cfd=pl.cfd;
     paraCount++;
+//    int rand_num=return_rand_num(200);
+   /* 
     if(paraCount==BATCH_SIZE)
     {
         #pragma offload target(mic:0), inout(request_array)
@@ -124,7 +128,43 @@ int handler_on_mic(paraList pl)
             write_response(request_array[i].efd, request_array[i].cfd, request_array[i].file_content); 
             print("file_path[%d]=%s, file_content=%s\n", i, request_array[i].file_path, request_array[i].file_content);
         }
-        paraCount=0;
+        paraCount=0; 
+    }*/
+}
+
+void time_scheduler(void *p)
+{
+    while(1)
+    {
+        long long end_time=get_time();
+        long long interval=end_time-start_time;
+        //printf("interval=%ld\n",interval);
+        //usleep(100*1000);
+                
+        if(paraCount==BATCH_SIZE||(interval>1000000&&paraCount>0))
+        {
+            printf("offload in batch %d\n", paraCount);
+            #pragma offload target(mic:0), inout(request_array)
+            #pragma omp parallel for
+            for(int i=0; i<paraCount; i++)
+            {
+                if(strlen(request_array[i].arg_name)==0)
+                {
+                    execute_static_page_on_mic(request_array[i].file_path, request_array[i].file_content);
+                }
+                else
+                {
+                    execute_dynamic_page_on_mic(request_array[i].file_path, request_array[i].arg_name, request_array[i].arg_value, request_array[i].file_content);
+                }
+            }
+
+            for(int i=0; i<paraCount; i++)
+            {
+                write_response(request_array[i].efd, request_array[i].cfd, request_array[i].file_content); 
+                print("file_path[%d]=%s, file_content=%s\n", i, request_array[i].file_path, request_array[i].file_content);
+            }
+            paraCount=0;
+        }
     }
 }
 
